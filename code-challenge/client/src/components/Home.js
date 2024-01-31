@@ -7,7 +7,7 @@ function Home() {
   useEffect(() => {
     fetch("/heroes")
       .then((r) => r.json())
-      .then(setHeros);
+      .then(data => setHeros(data));
   }, []);
 
   return (
