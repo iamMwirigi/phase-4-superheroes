@@ -1,55 +1,54 @@
-from flask import Flask
-from models import db, Power, Hero, HeroPower
-from random import choice
+# seed.py
+from app import app, db
+from models import Power, Hero, HeroPower
+import random
 
-def seed_powers():
-    print("🦸‍♀ Seeding powers...")
-    powers = [
-        Power(name="Flight", description="Ability to fly"),
-        Power(name="Super Strength", description="Enhanced strength"),
-        Power(name="Telekinesis", description="Move objects with the mind"),
-        # Add more powers as needed
+def seed_data():
+    print("🦸‍♀️ Seeding powers...")
+    powers_data = [
+        {"name": "super strength", "description": "gives the wielder super-human strengths"},
+        {"name": "flight", "description": "gives the wielder the ability to fly through the skies at supersonic speed"},
+        {"name": "super human senses", "description": "allows the wielder to use her senses at a super-human level"},
+        {"name": "elasticity", "description": "can stretch the human body to extreme lengths"}
     ]
 
-    db.session.add_all(powers)
-    db.session.commit()
-    print("🦸‍♀ Powers seeded!")
+    # Initialize SQLAlchemy only if not already registered
+    if 'sqlalchemy' not in app.extensions:
+        db.init_app(app)
 
-def seed_heroes():
-    print("🦸‍♀ Seeding heroes...")
-    heroes = [
-        Hero(name="Superman", super_name="Clark Kent"),
-        Hero(name="Wonder Woman", super_name="Diana Prince"),
-        Hero(name="Spider-Man", super_name="Peter Parker"),
-        # Add more heroes as needed
+    powers = Power.create(powers_data)
+
+
+
+    print("🦸‍♀️ Seeding heroes...")
+    heroes_data = [
+        {"name": "Kamala Khan", "super_name": "Ms. Marvel"},
+        {"name": "Doreen Green", "super_name": "Squirrel Girl"},
+        {"name": "Gwen Stacy", "super_name": "Spider-Gwen"},
+        {"name": "Janet Van Dyne", "super_name": "The Wasp"},
+        {"name": "Wanda Maximoff", "super_name": "Scarlet Witch"},
+        {"name": "Carol Danvers", "super_name": "Captain Marvel"},
+        {"name": "Jean Grey", "super_name": "Dark Phoenix"},
+        {"name": "Ororo Munroe", "super_name": "Storm"},
+        {"name": "Kitty Pryde", "super_name": "Shadowcat"},
+        {"name": "Elektra Natchios", "super_name": "Elektra"}
     ]
 
-    db.session.add_all(heroes)
-    db.session.commit()
-    print("🦸‍♀ Heroes seeded!")
+    heroes = Hero.create(heroes_data)
 
-def seed_hero_powers():
-    print("🦸‍♀ Adding powers to heroes...")
+    print("🦸‍♀️ Adding powers to heroes...")
     strengths = ["Strong", "Weak", "Average"]
-    heroes = Hero.query.all()
 
     for hero in heroes:
-        for _ in range(choice([1, 2, 3])):
-            power = Power.query.order_by(db.func.random()).first()
-            hero_power = HeroPower(hero=hero, power=power, strength=choice(strengths))
-            db.session.add(hero_power)
+        for _ in range(random.randint(1, 3)):  # Randomly assigning 1 to 3 powers to each hero
+            # get a random power
+            power = Power.query.get(random.choice(Power.query.with_entities(Power.id).all())[0])
 
-    db.session.commit()
-    print("🦸‍♀ Done seeding!")
+            HeroPower.create(hero=hero, power=power, strength=random.choice(strengths))
 
-if __name__ == '__main__':
-    app = Flask(__name__)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-    db.init_app(app)
+    print("🦸‍♀️ Done seeding!")
 
+if __name__ == "__main__":
     with app.app_context():
         db.create_all()
-        seed_powers()
-        seed_heroes()
-        seed_hero_powers()
+        seed_data()

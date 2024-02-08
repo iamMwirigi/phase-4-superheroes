@@ -15,6 +15,8 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + \
     os.path.join(basedir, 'instance/app.db')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+
+
 # Initialize SQLAlchemy only if not already registered
 if 'sqlalchemy' not in app.extensions:
     db.init_app(app)
